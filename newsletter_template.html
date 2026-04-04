@@ -191,6 +191,11 @@
       overflow: hidden;
       flex-shrink: 0;
     }
+    .page2-header-credits {
+      font-size: 0.7em;
+      color: #666;
+      margin-top: 0.05in;
+    }
     .page2-image-area {
       flex: 1;
       border: 3px dashed #F0566E;
@@ -293,7 +298,7 @@
 <body>
   <div class="page">
     <div class="page-header">
-      <img class="page-header-bg {{TITLE_IMAGE_SPOT}}" src="{{TITLE_IMAGE}}">
+      <img class="page-header-bg{{TITLE_IMAGE_SPOT}}" src="{{TITLE_IMAGE}}">
       <div class="page-header-content">{{TITLE}}</div>
     </div>
     <div class="page-content">
@@ -303,15 +308,17 @@
     </div>
     <div class="page-footer">
       <div class="sponsor-cta">{{SPONSOR_CTA}}</div>
-      <div class="ad-credits">{{AD_CREDITS}}</div>
+      <div class="ad-credits">{{AD_CREDITS}}{{SEP_CREDITS}}</div>
     </div>
   </div>
   
   <div class="page2">
-    <div class="page2-header">{{TITLE2}}</div>
+    <div class="page2-header">
+      {{TITLE2}}
+      <div class="page2-header-credits">{{PAGE2_CREDITS}}</div>
+    </div>
     <div class="page2-image-area {{PAGE2_BORDER_IMAGE}}">
       <img src="{{PAGE2_IMAGE}}">
-      <div class="page2-credits">{{PAGE2_CREDITS}}</div>
     </div>
     <div class="page2-footer">{{PAGE2_FOOTER}}</div>
   </div>

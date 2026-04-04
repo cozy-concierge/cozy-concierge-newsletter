@@ -99,6 +99,20 @@ def parse_page2_filename(filename: str) -> tuple:
     return title, author, imprint
 
 
+def parse_credit_from_filename(filename: str) -> str:
+    allowed_prefixes = ('ad_', 'sep_', 'by_', 'creator_', 'artist_')
+    name_lower = filename.lower()
+    for prefix in allowed_prefixes:
+        if name_lower.startswith(prefix):
+            credit = filename[len(prefix):]
+            credit = re.sub(r'([a-z])([A-Z])', r'\1 \2', credit)
+            credit = credit.replace('-', ' ').strip()
+            credit = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', credit, flags=re.IGNORECASE)
+            if credit and credit[0].isupper():
+                return credit
+    return ""
+
+
 def convert_markdown(text: str) -> str:
     if not MARKDOWN_AVAILABLE:
         return text
@@ -144,6 +158,7 @@ def generate_newsletter(
     sponsor_cta: str = "",
     ad_credits: str = "",
     page2_credits: str = "",
+    sep_credits: str = "",
     images_dir: Path = DEFAULT_IMAGES,
 ) -> str:
     template = load_template()
@@ -164,7 +179,7 @@ def generate_newsletter(
     replacements = {
         "{{TITLE}}": title,
         "{{TITLE_IMAGE}}": title_image,
-        "{{TITLE_IMAGE_SPOT}}": "title-image-spot" if title_image_spot else "",
+        "{{TITLE_IMAGE_SPOT}}": " title-image-spot" if title_image_spot else "",
         "{{TITLE2}}": title2,
         "{{AD_COLUMN_1}}": wrap_ads_in_sections(ad_column_1, separators[0] if separators else []),
         "{{AD_COLUMN_2}}": wrap_ads_in_sections(ad_column_2, separators[1] if separators else []),
@@ -175,6 +190,7 @@ def generate_newsletter(
         "{{SPONSOR_CTA}}": sponsor_cta,
         "{{AD_CREDITS}}": ad_credits,
         "{{PAGE2_CREDITS}}": page2_credits,
+        "{{SEP_CREDITS}}": sep_credits,
     }
     for placeholder, value in replacements.items():
         template = template.replace(placeholder, value)
@@ -343,21 +359,27 @@ def main():
     
     credits_path = images_dir / "credits.json"
     ad_credits_html = ""
-    if credits_path.exists():
-        with open(credits_path) as f:
-            credits_data = json.load(f)
-        
-        ad_credits_html = ""
-        if auto_ads:
-            ad_folder = images_dir / "ads"
-            if ad_folder.exists():
-                ad_files = [f for f in ad_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
-                credit_lines = []
-                for img_path in ad_files:
-                    verify_and_convert_image(img_path)
-                    credit_text = None
-                    if img_path.name in credits_data:
-                        credit_text = credits_data[img_path.name]
+    if auto_ads:
+        ad_folder = images_dir / "ads"
+        if ad_folder.exists():
+            ad_files = [f for f in ad_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
+            credit_lines = []
+            
+            has_credits_json = credits_path.exists()
+            credits_data = {}
+            if has_credits_json:
+                with open(credits_path) as f:
+                    credits_data = json.load(f)
+            
+            for img_path in ad_files:
+                verify_and_convert_image(img_path)
+                credit_text = None
+                if img_path.name in credits_data:
+                    credit_text = credits_data[img_path.name]
+                else:
+                    parsed_credit = parse_credit_from_filename(img_path.name)
+                    if parsed_credit:
+                        credit_text = f"By {parsed_credit}"
                     elif PIL_AVAILABLE:
                         try:
                             img = Image.open(img_path)
@@ -369,12 +391,36 @@ def main():
                                         credit_text = comment.decode('utf-8', errors='ignore').strip()
                         except:
                             pass
-                    
-                    if credit_text:
-                        credit_lines.append(f"<span class='ad-credits-inline'>{credit_text}</span>")
                 
-                if credit_lines:
-                    ad_credits_html = "".join(credit_lines)
+                if credit_text:
+                    credit_lines.append(f"<span class='ad-credits-inline'>{credit_text}</span>")
+            
+            if credit_lines:
+                ad_credits_html = "".join(credit_lines)
+    
+    sep_credits_html = ""
+    if auto_ads:
+        sep_folder = images_dir / "separators"
+        if sep_folder.exists():
+            sep_files = [f for f in sep_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
+            sep_credit_lines = []
+            for img_path in sep_files:
+                verify_and_convert_image(img_path)
+                parsed_credit = parse_credit_from_filename(img_path.name)
+                if parsed_credit:
+                    sep_credit_lines.append(f"<span class='ad-credits-inline'>By {parsed_credit}</span>")
+            
+            if sep_credit_lines:
+                sep_credits_html = " | ".join(sep_credit_lines)
+        
+        central_folder = images_dir / "separators" / "central"
+        if central_folder.exists():
+            central_files = [f for f in central_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
+            for img_path in central_files:
+                verify_and_convert_image(img_path)
+                parsed_credit = parse_credit_from_filename(img_path.name)
+                if parsed_credit:
+                    sep_credits_html += f" | <span class='ad-credits-inline'>By {parsed_credit}</span>"
 
     if use_markdown:
         title = convert_markdown(title)
@@ -385,7 +431,7 @@ def main():
 
     html = generate_newsletter(
         ad_column_1, ad_column_2, main_content, separators, title, title_img,
-        title_image_spot, title2, page2_img, page2_border_image, page2_footer, sponsor_cta, ad_credits_html, page2_credits, images_dir
+        title_image_spot, title2, page2_img, page2_border_image, page2_footer, sponsor_cta, ad_credits_html, page2_credits, sep_credits_html, images_dir
     )
 
     if args.print:

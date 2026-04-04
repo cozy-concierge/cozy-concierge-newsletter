@@ -1,7 +1,7 @@
 {
   "title": "# Cafe Stoplight\n\n*A newsletter by Cozy Concierge*",
-  "title_image": "cc_09.jpg",
-  "title_image_spot": false,
+  "title_image": "rails_title_header.jpg",
+  "title_image_spot": true,
   "main_content": "newsletter_content.md",
   "title2": "## Oh Shit! Oh Fuck!\n\n### By Cafe Stoplight",
   "page2_image": "",
