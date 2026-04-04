@@ -54,13 +54,63 @@ Edit `sample_config.json` to customize content:
 
 | Field | Description |
 |-------|-------------|
-| `title` | Page 1 header content (HTML) |
-| `main_content` | Page 1 center column content (HTML) |
-| `title2` | Page 2 header content (HTML) |
+| `title` | Page 1 header content (HTML or Markdown) |
+| `title_image` | Page 1 title background image filename |
+| `main_content` | Page 1 center column content (HTML or Markdown). Use `---` to separate sections. |
+| `title2` | Page 2 header content (HTML or Markdown) |
 | `page2_image` | Page 2 main image filename |
-| `page2_footer` | Page 2 footer content (HTML) |
+| `page2_footer` | Page 2 footer content (HTML or Markdown) |
+| `sponsor_cta` | Sponsor call-to-action text (HTML or Markdown) |
 | `auto_ads` | Auto-populate ads from `images/ads/` folder |
 | `images_dir` | Path to images folder |
+| `markdown` | Set to `true` to parse text fields as Markdown |
+
+### Using Markdown
+
+Instead of writing HTML, you can use Markdown for easier formatting:
+
+```json
+{
+  "title": "# Cafe Stoplight\n\n*A newsletter by Cozy Concierge*",
+  "main_content": "sample_content.md",
+  "title2": "## Featured Comic\n\nBy Cafe Stoplight",
+  "sponsor_cta": "**Support us!**\n\nDonate at example.com",
+  "markdown": true,
+  "auto_ads": true
+}
+```
+
+Or reference an external markdown file for main content:
+
+```json
+{
+  "main_content": "my-article.md"
+}
+```
+
+#### Markdown Syntax Examples
+
+```markdown
+# Heading 1
+## Heading 2
+
+Paragraph text with **bold** and *italic*
+
+- Bullet point
+- Another point
+
+[Link text](https://example.com)
+
+---
+
+Creates a new section (horizontal line)
+```
+
+#### Key Points
+
+- Use `---` on its own line to create new content sections
+- Separate sections get automatic separators in the central column
+- Run with `--markdown` flag or set `"markdown": true` in config
 
 ## Image Folders
 
