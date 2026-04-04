@@ -1,13 +1,13 @@
 {
   "title": "# Cafe Stoplight\n\n*A newsletter by Cozy Concierge*",
-  "title_image": "rails_title_header.jpg",
-  "title_image_spot": true,
+  "title_image": "",
+  "title_image_spot": false,
   "main_content": "newsletter_content.md",
+  "page1_cta": "**Support this newsletter!**\n\nUse code COZY for a free subscription to patreon.com/cafestoplight\n*All of the graphics on this newsletter were printed by Cozy Concierge.*\n\nGo to https://cozyconcierge.neocities.org to download a free iPhone sticker pack",
   "title2": "## Oh Shit! Oh Fuck!\n\n### By Cafe Stoplight",
   "page2_image": "",
   "page2_border_image": "",
-  "page2_footer": "Use code **COZY** at patreon.com/cafestoplight\n\nRequest this newsletter to be distributed at your local coffee shop\n\n*All of the graphics on this newsletter were printed by Cozy Concierge.*\n\nGo to https://cozyconcierge.neocities.org/ to download a free iPhone sticker pack",
-  "sponsor_cta": "**Support this newsletter!**\n\nUse code COZY for a free subscription to patreon.com/cafestoplight",
+  "page2_footer": "Use code **COZY** at patreon.com/cafestoplight\n\nRequest this newsletter to be distributed at your local coffee shop",
   "auto_ads": true,
   "markdown": true,
   "images_dir": "./images"

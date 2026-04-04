@@ -92,9 +92,15 @@ def parse_page2_filename(filename: str) -> tuple:
     
     parts = filename.split('_')
     if len(parts) >= 2:
-        author = parts[1].replace('-', ' ').strip()
+        author = parts[1]
+        author = re.sub(r'([a-z])([A-Z])', r'\1 \2', author)
+        author = author.replace('-', ' ').strip()
+        author = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', author, flags=re.IGNORECASE)
     if len(parts) >= 3:
-        imprint = parts[2].replace('-', ' ').strip()
+        imprint = parts[2]
+        imprint = re.sub(r'([a-z])([A-Z])', r'\1 \2', imprint)
+        imprint = imprint.replace('-', ' ').strip()
+        imprint = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', imprint, flags=re.IGNORECASE)
     
     return title, author, imprint
 
@@ -155,7 +161,7 @@ def generate_newsletter(
     page2_image: str = "",
     page2_border_image: str = "",
     page2_footer: str = "",
-    sponsor_cta: str = "",
+    page1_cta: str = "",
     ad_credits: str = "",
     page2_credits: str = "",
     sep_credits: str = "",
@@ -187,7 +193,7 @@ def generate_newsletter(
         "{{PAGE2_IMAGE}}": page2_image,
         "{{PAGE2_BORDER_IMAGE}}": page2_border_image,
         "{{PAGE2_FOOTER}}": page2_footer,
-        "{{SPONSOR_CTA}}": sponsor_cta,
+        "{{PAGE1_CTA}}": page1_cta,
         "{{AD_CREDITS}}": ad_credits,
         "{{PAGE2_CREDITS}}": page2_credits,
         "{{SEP_CREDITS}}": sep_credits,
@@ -308,7 +314,7 @@ def main():
         page2_image = config.get("page2_image", "")
         page2_border_image = config.get("page2_border_image", "")
         page2_footer = config.get("page2_footer", "")
-        sponsor_cta = config.get("sponsor_cta", "")
+        page1_cta = config.get("page1_cta", "")
         images_dir = Path(config.get("images_dir", args.images))
         auto_ads = config.get("auto_ads", False)
         use_markdown = config.get("markdown", False) or args.markdown
@@ -324,7 +330,7 @@ def main():
         page2_image = args.page2_image
         page2_border_image = args.page2_border_image
         page2_footer = args.page2_footer
-        sponsor_cta = args.sponsor_cta
+        page1_cta = args.page1_cta
         images_dir = args.images
         auto_ads = args.auto_ads
         use_markdown = args.markdown
@@ -337,6 +343,14 @@ def main():
 
     page2_img = resolve_image(page2_image, images_dir, "page2") if page2_image else ""
     title_img = resolve_image(title_image, images_dir, "title") if title_image else ""
+    
+    title_folder = images_dir / "title"
+    if not title_image and title_folder.exists():
+        title_files = [f for f in title_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
+        if title_files:
+            selected = random.choice(title_files)
+            verify_and_convert_image(selected)
+            title_img = resolve_image(selected.name, images_dir, "title")
     
     page2_folder = images_dir / "page2"
     page2_credits = ""
@@ -427,11 +441,11 @@ def main():
         main_content = convert_markdown(main_content)
         title2 = convert_markdown(title2)
         page2_footer = convert_markdown(page2_footer)
-        sponsor_cta = convert_markdown(sponsor_cta)
+        page1_cta = convert_markdown(page1_cta)
 
     html = generate_newsletter(
         ad_column_1, ad_column_2, main_content, separators, title, title_img,
-        title_image_spot, title2, page2_img, page2_border_image, page2_footer, sponsor_cta, ad_credits_html, page2_credits, sep_credits_html, images_dir
+        title_image_spot, title2, page2_img, page2_border_image, page2_footer, page1_cta, ad_credits_html, page2_credits, sep_credits_html, images_dir
     )
 
     if args.print:
