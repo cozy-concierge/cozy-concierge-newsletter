@@ -6,26 +6,26 @@ Generate printable newsletters with auto-populated ad images and PDF export.
 
 ```bash
 cd ~/opencode/newsletter
-python3 newsletter_generator.py -c sample_config.json --pdf
+python3 newsletter_generator.py -c newsletter_config.json --pdf
 ```
 
 ## Commands
 
 ### Generate HTML only
 ```bash
-python3 newsletter_generator.py -c sample_config.json
+python3 newsletter_generator.py -c newsletter_config.json
 ```
 Outputs to `output/newsletter.html`
 
 ### Generate HTML + PDF
 ```bash
-python3 newsletter_generator.py -c sample_config.json --pdf
+python3 newsletter_generator.py -c newsletter_config.json --pdf
 ```
 Outputs to `output/newsletter.html` and `output/newsletter.pdf`
 
 ### Preview in terminal
 ```bash
-python3 newsletter_generator.py -c sample_config.json --print
+python3 newsletter_generator.py -c newsletter_config.json --print
 ```
 Prints HTML to stdout instead of writing file
 
@@ -36,7 +36,7 @@ python3 newsletter_generator.py -t "Title" -m "<p>Content</p>" --auto-ads --pdf
 
 ## Configuration
 
-Edit `sample_config.json` to customize content:
+Edit `newsletter_config.json` to customize content:
 
 ```json
 {
@@ -72,7 +72,7 @@ Instead of writing HTML, you can use Markdown for easier formatting:
 ```json
 {
   "title": "# Cafe Stoplight\n\n*A newsletter by Cozy Concierge*",
-  "main_content": "sample_content.md",
+  "main_content": "newsletter_content.md",
   "title2": "## Featured Comic\n\nBy Cafe Stoplight",
   "sponsor_cta": "**Support us!**\n\nDonate at example.com",
   "markdown": true,
