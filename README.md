@@ -55,12 +55,14 @@ Edit `newsletter_config.json` to customize content:
 | Field | Description |
 |-------|-------------|
 | `title` | Page 1 header content (HTML or Markdown) |
-| `title_image` | Page 1 title background image filename |
-| `main_content` | Page 1 center column content (HTML or Markdown). Use `---` to separate sections. |
+| `title_image` | Page 1 title image filename (auto-populates from `images/title/` if empty) |
+| `title_image_spot` | Set to `true` for spot image mode (right-aligned) |
+| `main_content` | Page 1 center column content (HTML or Markdown file). Use `---` to separate sections. |
+| `page1_cta` | Page 1 footer CTA text (HTML or Markdown) |
 | `title2` | Page 2 header content (HTML or Markdown) |
-| `page2_image` | Page 2 main image filename |
+| `page2_image` | Page 2 main image filename (auto-populates from `images/page2/` if empty) |
+| `page2_border_image` | Set to `has-image-border` to enable custom border image |
 | `page2_footer` | Page 2 footer content (HTML or Markdown) |
-| `sponsor_cta` | Sponsor call-to-action text (HTML or Markdown) |
 | `auto_ads` | Auto-populate ads from `images/ads/` folder |
 | `images_dir` | Path to images folder |
 | `markdown` | Set to `true` to parse text fields as Markdown |
@@ -116,30 +118,50 @@ Creates a new section (horizontal line)
 
 ```
 newsletter/images/
-├── ads/           → Ad images (auto-populated, shuffled, no repeat)
-└── page2/         → Page 2 main image
+├── ads/           → Ad images (auto-populated, no repeat)
+├── title/         → Title header images (auto-populated)
+├── separators/    → Side column separator images
+│   └── central/  → Central column separators
+└── page2/         → Page 2 comic images (auto-populated)
 ```
 
 ### Adding Ads
-Drop images into `images/ads/` - they'll be randomly selected and split between the two columns. Images won't repeat on the same page.
+Drop images into `images/ads/`. Filename prefix `ad_` enables auto-credit:
+- `ad_ThoeleSarradet.jpeg` → "By Thoele Sarradet"
+
+### Title Image
+Drop images into `images/title/`. Set `title_image_spot: true` for right-aligned spot mode.
 
 ### Page 2 Image
-Drop your image into `images/page2/` and reference it in config:
-```json
-"page2_image": "your-comic-page.jpg"
-```
+Drop images into `images/page2/`. Filename patterns:
+- `OF1_AuthorName_Publisher.jpeg` → "By Author Name | Published by Publisher"
+- `OF` prefix generates title "Offtrack Vol. #"
 
-## Page Structure
+### Separators
+Drop images into `images/separators/` or `images/separators/central/`. Filename prefix `sep_` enables auto-credit:
+- `sep_JohnDoe.jpeg` → "By John Doe"
+
+## Page Structure (US Legal: 8.5" x 14")
 
 **Page 1:**
-- Header (1.2in height)
-- Two ad columns (2in each) + main content column
-- Ads auto-calculate how many fit before overflow
+- Header (0.9in height)
+- Two ad columns (2.25in each) + main content column
+- Footer with CTA + credits
 
 **Page 2:**
-- Header (1in height)
-- Full-width image area (A4-compatible)
-- Footer (1.5in height)
+- Header (1in height) with auto-generated credits
+- Full-width image area
+- Footer (1.5in height, 10px bottom padding for printing)
+
+## Filename Credit Convention
+
+| Prefix | Example | Output |
+|--------|---------|--------|
+| `ad_` | `ad_ThoeleSarradet.jpeg` | "By Thoele Sarradet" |
+| `sep_` | `sep_JohnDoe.jpeg` | "By John Doe" |
+| `OF#_` | `OF1_Author_Publisher.jpeg` | "By Author | Published by Publisher" |
+
+Note: Credits only appear if filename has uppercase letters after the prefix (camelCase becomes spaced words).
 
 ## Dependencies
 
