@@ -56,7 +56,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 0.08in 0.1in 0.08in 0.4in;
+      padding: 0.05in 0.05in 0.05in 0.3in;
       color: black;
     }
     .page-header-content h1 { font-size: 1.6em; margin: 0; }
@@ -192,7 +192,7 @@
       flex-shrink: 0;
     }
     .page2-header-credits {
-      font-size: 0.7em;
+      font-size: 1em;
       color: #666;
       margin-top: 0.05in;
     }
@@ -208,32 +208,66 @@
     }
     .page2-image-area.has-image-border {
       border: none;
-      background-repeat: repeat;
-      background-position: content-box;
+      position: relative;
     }
-    .page2-image-area.has-image-border::before {
-      content: "";
+    .page2-image-area.has-image-border .border-left,
+    .page2-image-area.has-image-border .border-right {
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
       bottom: 0;
-      border: 20px solid transparent;
-      border-image: var(--page2-border-image) 30 stretch;
-      pointer-events: none;
+      width: 40px;
+      background-image: url('../images/page2/borders/cc_20-1.jpg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center center;
+      z-index: 1;
+    }
+    .page2-image-area.has-image-border .border-left {
+      left: 0;
+    }
+    .page2-image-area.has-image-border .border-right {
+      right: 0;
+    }
+    .page2-image-area.has-image-border .border-left {
+      left: 0;
+      transform: scaleX(-1);
+      -webkit-transform: scaleX(-1);
+      transform-origin: center center;
+      -webkit-transform-origin: center center;
+    }
+    .page2-image-area.has-image-border .border-right {
+      right: 0;
+    }
+    .page2-image-area.has-image-border img {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      top: 0;
+      bottom: 0;
+      width: calc(100% - 80px);
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
+    }
+    .page2-border-tile, .page2-image-area.has-image-border::before, .page2-image-area.has-image-border::after {
+      display: none;
+    }
+    .page2-image-area.has-image-border img {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      top: 0;
+      bottom: 0;
+      width: calc(100% - 80px);
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
     }
     .page2-image-area img {
       width: 100%;
       height: 100%;
       object-fit: contain;
       object-position: center top;
-    }
-    .page2-credits {
-      font-size: 0.7em;
-      color: #666;
-      text-align: right;
-      padding: 0.05in;
-      border-top: 1px solid #ccc;
     }
     .page2-footer {
       border: 3px solid #F0566E;
@@ -254,6 +288,7 @@
     .page-header-bg.title-image-spot {
       position: absolute;
       right: 0;
+      left: auto;
       width: auto;
       max-width: 50%;
     }
@@ -298,36 +333,36 @@
 <body>
   <div class="page">
     <div class="page-header">
-      <img class="page-header-bg" src="../images/title/rails_title_header.jpg">
+      <img class="page-header-bg title-image-spot" src="../images/title/cc_12.jpg">
       <div class="page-header-content"><h1>Cafe Stoplight</h1>
 <p><em>A newsletter by Cozy Concierge</em></p></div>
     </div>
     <div class="page-content">
-      <div class="ad-column"><div class='ad-section ad-style-5'><div class='ad-section-inner'><img src='../images/ads/IMG_2564.jpg'></div></div>
-<div class='ad-separator'><img src='../images/separators/cc_15.jpg'></div>
-<div class='ad-section ad-style-5'><div class='ad-section-inner'><img src='../images/ads/IMG_2565.jpg'></div></div>
-<div class='ad-separator'><img src='../images/separators/cc_04.jpg'></div>
+      <div class="ad-column"><div class='ad-section ad-style-1'><div class='ad-section-inner'><img src='../images/ads/IMG_2564.jpg'></div></div>
+<div class='ad-separator'><img src='../images/separators/cc_03.jpeg'></div>
+<div class='ad-section ad-style-4'><div class='ad-section-inner'><img src='../images/ads/IMG_2565.jpg'></div></div>
+<div class='ad-separator'><img src='../images/separators/cc_18-1.jpg'></div>
 <div class='ad-section ad-style-2'><div class='ad-section-inner'><img src='../images/ads/IMG_2566.jpg'></div></div>
-<div class='ad-separator'><img src='../images/separators/cc_13.jpg'></div></div>
+<div class='ad-separator'><img src='../images/separators/cc_04.jpg'></div></div>
       <div class="main-content"><div class='content-block'><h2>Spoils of Gwar</h2>
 <p>Life roils onward in the imperial core. Aw, I'm just kiddin'! Nothing matters except comics. Have you bought any new stationery? I'd like to do something with my life other than go shopping at Daiso but lemme tell ya, it really does the trick.</p></div>
-<div class='content-separator'><img src='../images/separators/central/cc_10.jpg'></div>
+<div class='content-separator'><img src='../images/separators/central/cc_04.jpg'></div>
 <div class='content-block'><h2>Spacy Film of the Week</h2>
 <p>Take the <strong>DART</strong> on the Red Line to Tyler Station to see <em>Parsimonious</em> at Spacy microcinema.</p>
 <ul>
 <li>Screens March 27 at 7:30 pm</li>
 <li>Check the Spacy calendar at https://www.spacydtx.com</li>
 </ul></div>
-<div class='content-separator'><img src='../images/separators/central/Screenshot 2026-03-31 at 9.03.18 PM.png'></div>
+<div class='content-separator'><img src='../images/separators/central/cc_19-1.jpg'></div>
 <div class='content-block'><h2>Upcoming Events</h2>
 <p>More happenings around town...</p></div>
-<div class='content-separator'><img src='../images/separators/central/cc_04._1.jpg'></div></div>
-      <div class="ad-column"><div class='ad-section ad-style-5'><div class='ad-section-inner'><img src='../images/ads/IMG_2567.jpg'></div></div>
+<div class='content-separator'><img src='../images/separators/central/cc_02.jpeg'></div></div>
+      <div class="ad-column"><div class='ad-section ad-style-4'><div class='ad-section-inner'><img src='../images/ads/IMG_2567.jpg'></div></div>
 <div class='ad-separator'><img src='../images/separators/cc_13.jpg'></div>
-<div class='ad-section ad-style-2'><div class='ad-section-inner'><img src='../images/ads/cc_04.jpg'></div></div>
-<div class='ad-separator'><img src='../images/separators/cc_08.jpg'></div>
-<div class='ad-section ad-style-3'><div class='ad-section-inner'><img src='../images/ads/cc_08.jpeg'></div></div>
-<div class='ad-separator'><img src='../images/separators/cc_09.jpg'></div></div>
+<div class='ad-section ad-style-5'><div class='ad-section-inner'><img src='../images/ads/cc_04.jpg'></div></div>
+<div class='ad-separator'><img src='../images/separators/cc_18-1.jpg'></div>
+<div class='ad-section ad-style-2'><div class='ad-section-inner'><img src='../images/ads/cc_08.jpeg'></div></div>
+<div class='ad-separator'><img src='../images/separators/cc_18-2.jpg'></div></div>
     </div>
     <div class="page-footer">
       <div class="sponsor-cta"><p><strong>Support this newsletter!</strong></p>
@@ -343,7 +378,9 @@
       <h2>Offtrack Vol. 4</h2>
       <div class="page2-header-credits">By Thoele Sarradet | Published by Cafe Stoplight</div>
     </div>
-    <div class="page2-image-area ">
+    <div class="page2-image-area has-image-border">
+      <div class="border-left"></div>
+      <div class="border-right"></div>
       <img src="../images/page2/OF4-3_ThoeleSarradet_CafeStoplight.jpeg">
     </div>
     <div class="page2-footer"><p>Use code <strong>COZY</strong> at patreon.com/cafestoplight</p>

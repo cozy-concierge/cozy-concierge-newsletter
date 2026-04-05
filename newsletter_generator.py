@@ -96,11 +96,15 @@ def parse_page2_filename(filename: str) -> tuple:
         author = re.sub(r'([a-z])([A-Z])', r'\1 \2', author)
         author = author.replace('-', ' ').strip()
         author = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', author, flags=re.IGNORECASE)
+        if author and not any(c.isalpha() for c in author):
+            author = ""
     if len(parts) >= 3:
         imprint = parts[2]
         imprint = re.sub(r'([a-z])([A-Z])', r'\1 \2', imprint)
         imprint = imprint.replace('-', ' ').strip()
         imprint = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', imprint, flags=re.IGNORECASE)
+        if imprint and not any(c.isalpha() for c in imprint):
+            imprint = ""
     
     return title, author, imprint
 
@@ -160,6 +164,7 @@ def generate_newsletter(
     title2: str = "",
     page2_image: str = "",
     page2_border_image: str = "",
+    page2_border_file: str = "",
     page2_footer: str = "",
     page1_cta: str = "",
     ad_credits: str = "",
@@ -192,6 +197,7 @@ def generate_newsletter(
         "{{MAIN_CONTENT}}": content_html,
         "{{PAGE2_IMAGE}}": page2_image,
         "{{PAGE2_BORDER_IMAGE}}": page2_border_image,
+        "{{PAGE2_BORDER_FILE}}": page2_border_file,
         "{{PAGE2_FOOTER}}": page2_footer,
         "{{PAGE1_CTA}}": page1_cta,
         "{{AD_CREDITS}}": ad_credits,
@@ -271,7 +277,8 @@ def main():
     parser.add_argument("--title-image-spot", action="store_true", help="Use title image as spot image (right-aligned)")
     parser.add_argument("--title2", default="", help="Page 2 title (HTML)")
     parser.add_argument("--page2-image", "-p", default="", help="Page 2 image filename or path")
-    parser.add_argument("--page2-border-image", default="", help="Page 2 border image URL")
+    parser.add_argument("--page2-border-image", default="", help="Page 2 border CSS class")
+    parser.add_argument("--page2-border-file", default="", help="Page 2 border image filename")
     parser.add_argument("--page2-footer", default="", help="Page 2 footer content (HTML)")
     parser.add_argument("--sponsor-cta", default="", help="Sponsor call to action text (HTML)")
     parser.add_argument("--images", default=DEFAULT_IMAGES, type=Path, help="Images folder path")
@@ -313,6 +320,7 @@ def main():
         title2 = config.get("title2", "")
         page2_image = config.get("page2_image", "")
         page2_border_image = config.get("page2_border_image", "")
+        page2_border_file = config.get("page2_border_file", "")
         page2_footer = config.get("page2_footer", "")
         page1_cta = config.get("page1_cta", "")
         images_dir = Path(config.get("images_dir", args.images))
@@ -329,6 +337,7 @@ def main():
         title2 = args.title2
         page2_image = args.page2_image
         page2_border_image = args.page2_border_image
+        page2_border_file = args.page2_border_file
         page2_footer = args.page2_footer
         page1_cta = args.page1_cta
         images_dir = args.images
@@ -370,6 +379,18 @@ def main():
             if imprint_from_file:
                 credit_parts.append(f"Published by {imprint_from_file}")
             page2_credits = " | ".join(credit_parts) if credit_parts else ""
+    
+    page2_border_image = ""
+    page2_border_file = ""
+    if not page2_border_image:
+        border_folder = images_dir / "page2" / "borders"
+        if border_folder.exists():
+            border_files = [f for f in border_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
+            if border_files:
+                selected = random.choice(border_files)
+                verify_and_convert_image(selected)
+                page2_border_image = "has-image-border"
+                page2_border_file = selected.name
     
     credits_path = images_dir / "credits.json"
     ad_credits_html = ""
@@ -445,7 +466,7 @@ def main():
 
     html = generate_newsletter(
         ad_column_1, ad_column_2, main_content, separators, title, title_img,
-        title_image_spot, title2, page2_img, page2_border_image, page2_footer, page1_cta, ad_credits_html, page2_credits, sep_credits_html, images_dir
+        title_image_spot, title2, page2_img, page2_border_image, page2_border_file, page2_footer, page1_cta, ad_credits_html, page2_credits, sep_credits_html, images_dir
     )
 
     if args.print:
