@@ -13,6 +13,20 @@ Take the **DART** on the Red Line to Tyler Station to see *Parsimonious* at Spac
 
 ---
 
-## Upcoming Events
+## Places to Visit
 
-More happenings around town...
+Check out Fine Print in Oak Cliff for a selection of imported European and Japanese fashion magazines!
+
+---page2---
+
+## Offtrack Vol. 1
+
+---
+
+Use code **COZY** at patreon.com/cafestoplight
+
+Request this newsletter to be distributed at your local coffee shop
+
+*All of the graphics on this newsletter were printed by Cozy Concierge.*
+
+Go to https://cozyconcierge.neocities.org to download a free iPhone sticker pack

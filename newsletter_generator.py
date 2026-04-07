@@ -7,6 +7,7 @@ import random
 import re
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 try:
     import markdown
@@ -55,8 +56,8 @@ def resolve_image(image_name: str, images_dir: Path, slot: str = "") -> str:
     if "/" in image_name or image_name.startswith("images/"):
         return image_name
     if slot:
-        return f"../{images_dir.name}/{slot}/{image_name}"
-    return f"../{images_dir.name}/{image_name}"
+        return f"../{images_dir.name}/{slot}/{quote(image_name)}"
+    return f"../{images_dir.name}/{quote(image_name)}"
 
 
 def verify_and_convert_image(img_path: Path) -> None:
@@ -109,17 +110,42 @@ def parse_page2_filename(filename: str) -> tuple:
     return title, author, imprint
 
 
-def parse_credit_from_filename(filename: str) -> str:
+def parse_credit_from_filename(filename: str) -> tuple:
     allowed_prefixes = ('ad_', 'sep_', 'by_', 'creator_', 'artist_')
     name_lower = filename.lower()
     for prefix in allowed_prefixes:
         if name_lower.startswith(prefix):
-            credit = filename[len(prefix):]
-            credit = re.sub(r'([a-z])([A-Z])', r'\1 \2', credit)
-            credit = credit.replace('-', ' ').strip()
-            credit = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', credit, flags=re.IGNORECASE)
-            if credit and credit[0].isupper():
-                return credit
+            credit_part = filename[len(prefix):]
+            credit_part = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', credit_part, flags=re.IGNORECASE)
+            
+            parts = credit_part.split('_')
+            author = ""
+            imprint = ""
+            
+            if len(parts) >= 1 and parts[0]:
+                author = re.sub(r'([a-z])([A-Z])', r'\1 \2', parts[0])
+                author = author.replace('-', ' ').strip()
+            
+            if len(parts) >= 2 and parts[1]:
+                imprint = re.sub(r'([a-z])([A-Z])', r'\1 \2', parts[1])
+                imprint = imprint.replace('-', ' ').strip()
+            
+            if author and author[0].isupper():
+                return (author, imprint)
+            return ("", "")
+    return ("", "")
+
+
+def parse_separator_description(filename: str) -> str:
+    allowed_prefixes = ('sep_',)
+    name_lower = filename.lower()
+    for prefix in allowed_prefixes:
+        if name_lower.startswith(prefix):
+            description = filename[len(prefix):]
+            description = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', description, flags=re.IGNORECASE)
+            description = description.replace('-', ' ').strip()
+            if description:
+                return description
     return ""
 
 
@@ -220,7 +246,7 @@ def auto_populate_ads_random(images_dir: Path, slot: str) -> tuple:
     
     images = sorted(slot_path.glob("*"))
     ad_images = [
-        f"<img src='../{images_dir.name}/{slot}/{img.name}'>"
+        f"<img src='../{images_dir.name}/{slot}/{quote(img.name)}'>"
         for img in images
         if img.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]
     ]
@@ -229,13 +255,13 @@ def auto_populate_ads_random(images_dir: Path, slot: str) -> tuple:
     sep_list = []
     if sep_path.exists():
         sep_images = sorted(sep_path.glob("*"))
-        sep_list = [f"{images_dir.name}/separators/{s.name}" for s in sep_images if s.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
+        sep_list = [f"{images_dir.name}/separators/{quote(s.name)}" for s in sep_images if s.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
     
     central_path = images_dir / "separators" / "central"
     central_list = []
     if central_path.exists():
         central_images = sorted(central_path.glob("*"))
-        central_list = [f"{images_dir.name}/separators/central/{c.name}" for c in central_images if c.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
+        central_list = [f"{images_dir.name}/separators/central/{quote(c.name)}" for c in central_images if c.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
     
     if not ad_images:
         return ("", "", [], [], [])
@@ -305,11 +331,26 @@ def main():
         if main_content_path and Path(main_content_path).exists():
             with open(main_content_path) as mf:
                 md_content = mf.read()
+            
+            if "---page2---" in md_content:
+                page1_text, page2_text = md_content.split("---page2---", 1)
+            else:
+                page1_text = md_content
+                page2_text = ""
+            
             if MARKDOWN_AVAILABLE:
                 md = markdown.Markdown()
-                config["main_content"] = md.convert(md_content)
+                config["main_content"] = md.convert(page1_text.strip())
+                if page2_text.strip():
+                    page2_parsed = md.convert(page2_text.strip())
+                    page2_lines = page2_parsed.strip().split("\n")
+                    if page2_lines and page2_lines[0].startswith("<h"):
+                        config["title2"] = page2_lines[0]
+                        config["page2_footer"] = "\n".join(page2_lines[1:]).strip()
             else:
-                config["main_content"] = md_content
+                config["main_content"] = page1_text.strip()
+                if page2_text.strip():
+                    config["page2_footer"] = page2_text.strip()
         
         ad_column_1 = config.get("ad_column_1", "")
         ad_column_2 = config.get("ad_column_2", "")
@@ -412,9 +453,12 @@ def main():
                 if img_path.name in credits_data:
                     credit_text = credits_data[img_path.name]
                 else:
-                    parsed_credit = parse_credit_from_filename(img_path.name)
-                    if parsed_credit:
-                        credit_text = f"By {parsed_credit}"
+                    author, imprint = parse_credit_from_filename(img_path.name)
+                    if author:
+                        if imprint:
+                            credit_text = f"By {author} | For {imprint}"
+                        else:
+                            credit_text = f"By {author}"
                     elif PIL_AVAILABLE:
                         try:
                             img = Image.open(img_path)
@@ -435,27 +479,28 @@ def main():
     
     sep_credits_html = ""
     if auto_ads:
-        sep_folder = images_dir / "separators"
-        if sep_folder.exists():
-            sep_files = [f for f in sep_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
-            sep_credit_lines = []
-            for img_path in sep_files:
-                verify_and_convert_image(img_path)
-                parsed_credit = parse_credit_from_filename(img_path.name)
-                if parsed_credit:
-                    sep_credit_lines.append(f"<span class='ad-credits-inline'>By {parsed_credit}</span>")
-            
-            if sep_credit_lines:
-                sep_credits_html = " | ".join(sep_credit_lines)
-        
         central_folder = images_dir / "separators" / "central"
         if central_folder.exists():
             central_files = [f for f in central_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
             for img_path in central_files:
                 verify_and_convert_image(img_path)
-                parsed_credit = parse_credit_from_filename(img_path.name)
-                if parsed_credit:
-                    sep_credits_html += f" | <span class='ad-credits-inline'>By {parsed_credit}</span>"
+                author, imprint = parse_credit_from_filename(img_path.name)
+                if author:
+                    if imprint:
+                        sep_credits_html += f"<span class='ad-credits-inline'>By {author} | For {imprint}</span>"
+                    else:
+                        sep_credits_html += f"<span class='ad-credits-inline'>By {author}</span>"
+        
+        sep_folder = images_dir / "separators"
+        if sep_folder.exists():
+            sep_files = [f for f in sep_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
+            for img_path in sep_files:
+                verify_and_convert_image(img_path)
+                description = parse_separator_description(img_path.name)
+                if description:
+                    if sep_credits_html:
+                        sep_credits_html += " | "
+                    sep_credits_html += f"<span class='ad-credits-inline'>{description}</span>"
 
     if use_markdown:
         title = convert_markdown(title)
