@@ -127,19 +127,21 @@ newsletter/images/
 
 ### Adding Ads
 Drop images into `images/ads/`. Filename prefix `ad_` enables auto-credit:
-- `ad_ThoeleSarradet.jpeg` → "By Thoele Sarradet"
+- `ad_JohnDoe_PublisherName.jpeg` → "By John Doe | For Publisher Name"
+- `ad_JaneSmith.jpeg` → "By Jane Smith"
 
 ### Title Image
 Drop images into `images/title/`. Set `title_image_spot: true` for right-aligned spot mode.
 
 ### Page 2 Image
 Drop images into `images/page2/`. Filename patterns:
-- `OF1_AuthorName_Publisher.jpeg` → "By Author Name | Published by Publisher"
+- `OF1_AuthorName_PublisherName.jpeg` → "By Author Name | Published by Publisher Name"
 - `OF` prefix generates title "Offtrack Vol. #"
 
 ### Separators
 Drop images into `images/separators/` or `images/separators/central/`. Filename prefix `sep_` enables auto-credit:
-- `sep_JohnDoe.jpeg` → "By John Doe"
+- Main separators (`/images/separators/`): `sep_ImageDescription.jpeg` → "Image Description" (no "By")
+- Central separators (`/images/separators/central/`): `sep_JaneDoe_PublisherName.jpeg` → "By Jane Doe | For Publisher Name"
 
 ## Page Structure (US Legal: 8.5" x 14")
 
