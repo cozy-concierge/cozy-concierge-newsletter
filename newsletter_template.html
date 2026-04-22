@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     @page { size: 8.5in 14in; margin: 0.3in; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { margin: 0; padding: 0; font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
     
     @media screen {
@@ -21,19 +21,20 @@
     }
     
     .page {
-      height: 13.4in;
-      max-height: 13.4in;
-      overflow: hidden;
+      min-height: 14in;
+      overflow: visible;
       display: flex;
       flex-direction: column;
+      break-after: page;
+      -webkit-break-after: page;
     }
     
     .page-header {
       border: 3px solid #F0566E;
       border-radius: 8px;
-      height: 0.9in;
-      max-height: 0.9in;
-      overflow: hidden;
+      height: 0.7in;
+      max-height: 0.7in;
+      overflow: visible;
       flex-shrink: 0;
       position: relative;
       background-size: cover;
@@ -68,28 +69,36 @@
       flex: 1;
       gap: 0.2in;
       padding-top: 0.2in;
-      overflow: hidden;
+      overflow: visible;
     }
     
     .ad-column {
-      width: 2.25in;
+      width: 2.3in;
       display: flex;
       flex-direction: column;
       gap: 0.12in;
-      overflow: hidden;
+      overflow: visible;
       flex-shrink: 0;
     }
     
     .ad-separator {
       width: 100%;
-      max-height: 0.75in;
-      overflow: hidden;
+      max-height: 0.61in;
+      overflow: visible;
     }
     .ad-separator img {
       width: 100%;
       height: auto;
-      max-height: 0.75in;
+      max-height: 0.61in;
       object-fit: contain;
+    }
+    .ad-separator-text {
+      font-size: 0.65em;
+      color: #666;
+      text-align: center;
+      padding: 0.05in 0;
+      border-top: 1px solid #ddd;
+      margin-top: 0.05in;
     }
     
     .main-content {
@@ -137,7 +146,7 @@
       border: 3px solid #F0566E;
       border-radius: 8px;
       overflow: hidden;
-      height: 2.6in;
+      height: 3.25in;
       flex-shrink: 0;
       background: white;
     }
@@ -175,19 +184,21 @@
     }
     
     .page2 {
-      height: 13.4in;
-      max-height: 13.4in;
+      height: 13.8in;
+      max-height: 13.8in;
       display: flex;
       flex-direction: column;
       gap: 0.2in;
       overflow: hidden;
+      break-before: page;
+      -webkit-break-before: page;
     }
     .page2-header {
       border: 3px solid #F0566E;
       border-radius: 8px;
       padding: 0.15in;
-      height: 1in;
-      max-height: 1in;
+      height: 1.1in;
+      max-height: 1.1in;
       overflow: hidden;
       flex-shrink: 0;
     }
@@ -303,21 +314,19 @@
     }
     .page-footer {
       border-top: 3px solid #F0566E;
-      padding: 0.1in;
-      margin-top: 0.15in;
-      max-height: 1.5in;
+      padding: 0.15in;
+      min-height: 0.4in;
+      max-height: 0.6in;
       overflow: hidden;
       flex-shrink: 0;
     }
     .sponsor-cta {
-      margin-bottom: 0.15in;
-      padding-bottom: 0.15in;
-      border-bottom: 1px solid #ccc;
+      margin-bottom: 0.05in;
     }
     .ad-credits {
-      font-size: 0.7em;
+      font-size: 0.6em;
       color: #666;
-      line-height: 1.4;
+      line-height: 1.3;
     }
     .ad-credits-inline {
       display: inline;
@@ -329,9 +338,9 @@
       content: "";
     }
     .sep-credits {
-      font-size: 0.7em;
+      font-size: 0.6em;
       color: #666;
-      margin-top: 0.05in;
+      margin-top: 0.03in;
     }
   </style>
 </head>
@@ -349,7 +358,7 @@
     <div class="page-footer">
       <div class="sponsor-cta">{{PAGE1_CTA}}</div>
       <div class="ad-credits">{{AD_CREDITS}}</div>
-      <div class="sep-credits">{{SEP_CREDITS}}</div>
+      <!-- <div class="sep-credits">{{SEP_CREDITS}}</div> -->
     </div>
   </div>
   

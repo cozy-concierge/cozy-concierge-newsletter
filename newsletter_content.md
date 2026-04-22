@@ -13,9 +13,16 @@ Take the **DART** on the Red Line to Tyler Station to see *Parsimonious* at Spac
 
 ---
 
-## Places to Visit
+## You Better Be Nice to Me
 
-Check out Fine Print in Oak Cliff for a selection of imported European and Japanese fashion magazines!
+Weekly trash walk at 9:30am at Exall Park near downtown Dallas. Nitrile gloves provided. If you're nice to me I'll give you a hand printed shirt.
+
+---cta---
+
+**Support this newsletter!**
+
+Use code COZY for a free subscription to patreon.com/cafestoplight
+
 
 ---page2---
 

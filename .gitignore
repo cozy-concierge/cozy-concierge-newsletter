@@ -1,0 +1,12 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Output files
+output/
+*.pdf
+*.html
+
+# Python
+__pycache__/
+*.pyc

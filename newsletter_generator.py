@@ -32,14 +32,6 @@ TEMPLATE_PATH = Path(__file__).parent / "newsletter_template.html"
 DEFAULT_IMAGES = Path(__file__).parent / "images"
 DEFAULT_OUTPUT = Path(__file__).parent / "output"
 
-PAGE_HEIGHT = 13.4
-HEADER_HEIGHT = 0.9
-AD_HEIGHT = 2.6
-AD_GAP = 0.1
-PAGE2_HEADER = 1.0
-PAGE2_FOOTER = 1.5
-PAGE2_GAP = 0.2
-
 
 def load_template() -> str:
     if not TEMPLATE_PATH.exists():
@@ -82,30 +74,48 @@ def verify_and_convert_image(img_path: Path) -> None:
         print(f"Warning: Could not verify {img_path.name}: {e}", file=sys.stderr)
 
 
+def resize_if_large(img_path: Path, max_width: int = 2000) -> None:
+    if not PIL_AVAILABLE or not img_path.exists():
+        return
+    try:
+        img = Image.open(img_path)
+        if img.width > max_width:
+            ratio = max_width / img.width
+            new_height = int(img.height * ratio)
+            img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+            print(f"Resizing {img_path.name} to {max_width}px width...", file=sys.stderr)
+            img.save(img_path, quality=85, optimize=True)
+    except Exception as e:
+        print(f"Warning: Could not resize {img_path.name}: {e}", file=sys.stderr)
+
+
 def parse_page2_filename(filename: str) -> tuple:
     title = ""
     author = ""
     imprint = ""
     
-    match = re.search(r'OF(\d+)', filename, re.IGNORECASE)
-    if match:
-        title = f"Offtrack Vol. {match.group(1)}"
+    of_match = re.search(r'OF(\d+)', filename, re.IGNORECASE)
+    if of_match:
+        title = f"Offtrack Vol. {of_match.group(1)}"
     
     parts = filename.split('_')
-    if len(parts) >= 2:
+    if len(parts) >= 2 and parts[1]:
         author = parts[1]
         author = re.sub(r'([a-z])([A-Z])', r'\1 \2', author)
         author = author.replace('-', ' ').strip()
         author = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', author, flags=re.IGNORECASE)
         if author and not any(c.isalpha() for c in author):
             author = ""
-    if len(parts) >= 3:
+    if len(parts) >= 3 and parts[2]:
         imprint = parts[2]
         imprint = re.sub(r'([a-z])([A-Z])', r'\1 \2', imprint)
         imprint = imprint.replace('-', ' ').strip()
         imprint = re.sub(r'\.(jpeg|jpg|png|gif|webp)$', '', imprint, flags=re.IGNORECASE)
         if imprint and not any(c.isalpha() for c in imprint):
             imprint = ""
+    
+    if not title and author:
+        title = author
     
     return title, author, imprint
 
@@ -156,7 +166,7 @@ def convert_markdown(text: str) -> str:
     return md.convert(text)
 
 
-def wrap_ads_in_sections(ads_html: str, separators: list = None) -> str:
+def wrap_ads_in_sections(ads_html: str, separators: list = None, ad_filenames: list = None) -> str:
     if not ads_html.strip():
         return ""
     sections = []
@@ -172,9 +182,28 @@ def wrap_ads_in_sections(ads_html: str, separators: list = None) -> str:
         style = random.choice(styles)
         sections.append(f"<div class='ad-section {style}'>{img_tag}</div>")
         
-        if separators and i < len(separators) - 1:
-            sep_img = f"../{separators[i]}"
-            sections.append(f"<div class='ad-separator'><img src='{sep_img}'></div>")
+        if len(ads) > 1 and i < len(ads) - 1:
+            filename = ad_filenames[i] if ad_filenames and i < len(ad_filenames) else ""
+            ext = Path(filename).suffix.lower() if filename else ""
+            name_without_ext = Path(filename).stem if filename else ""
+            
+            if "_" in name_without_ext and ext in [".jpg", ".jpeg", ".png", ".gif", ".webp"]:
+                parts = name_without_ext.split("_")
+                if len(parts) >= 3:
+                    title = parts[0]
+                    artist = parts[1]
+                    publisher = "_".join(parts[2:])
+                    credit_text = f"{title} by {artist}, published by {publisher}"
+                    sections.append(f"<div class='ad-separator-text'>{credit_text}</div>")
+                elif len(parts) == 2:
+                    credit_text = f"{parts[0]} by {parts[1]}"
+                    sections.append(f"<div class='ad-separator-text'>{credit_text}</div>")
+                elif separators and i < len(separators):
+                    sep_img = f"../{separators[i]}"
+                    sections.append(f"<div class='ad-separator'><img src='{sep_img}'></div>")
+            elif separators and i < len(separators):
+                sep_img = f"../{separators[i]}"
+                sections.append(f"<div class='ad-separator'><img src='{sep_img}'></div>")
     
     return "\n".join(sections)
 
@@ -197,6 +226,8 @@ def generate_newsletter(
     page2_credits: str = "",
     sep_credits: str = "",
     images_dir: Path = DEFAULT_IMAGES,
+    fn1: list = None,
+    fn2: list = None,
 ) -> str:
     template = load_template()
     
@@ -218,8 +249,8 @@ def generate_newsletter(
         "{{TITLE_IMAGE}}": title_image,
         "{{TITLE_IMAGE_SPOT}}": " title-image-spot" if title_image_spot else "",
         "{{TITLE2}}": title2,
-        "{{AD_COLUMN_1}}": wrap_ads_in_sections(ad_column_1, separators[0] if separators else []),
-        "{{AD_COLUMN_2}}": wrap_ads_in_sections(ad_column_2, separators[1] if separators else []),
+        "{{AD_COLUMN_1}}": wrap_ads_in_sections(ad_column_1, separators[0] if separators else [], fn1 if fn1 else []),
+        "{{AD_COLUMN_2}}": wrap_ads_in_sections(ad_column_2, separators[1] if separators else [], fn2 if fn2 else []),
         "{{MAIN_CONTENT}}": content_html,
         "{{PAGE2_IMAGE}}": page2_image,
         "{{PAGE2_BORDER_IMAGE}}": page2_border_image,
@@ -242,7 +273,7 @@ def get_max_ads_per_column() -> int:
 def auto_populate_ads_random(images_dir: Path, slot: str) -> tuple:
     slot_path = images_dir / slot
     if not slot_path.exists():
-        return ("", "", [], [], [])
+        return ("", "", [], [], [], []), ([], [])
     
     images = sorted(slot_path.glob("*"))
     ad_images = [
@@ -250,6 +281,7 @@ def auto_populate_ads_random(images_dir: Path, slot: str) -> tuple:
         for img in images
         if img.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]
     ]
+    ad_filenames = [img.name for img in images if img.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
     
     sep_path = images_dir / "separators"
     sep_list = []
@@ -264,21 +296,24 @@ def auto_populate_ads_random(images_dir: Path, slot: str) -> tuple:
         central_list = [f"{images_dir.name}/separators/central/{quote(c.name)}" for c in central_images if c.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
     
     if not ad_images:
-        return ("", "", [], [], [])
+        return ("", "", [], [], []), ([], [])
     
     used = set()
     
     max_ads = get_max_ads_per_column()
     col1, col2 = [], []
+    fn1, fn2 = [], []
     
     for img in ad_images:
         if img in used:
             continue
         if len(col1) < max_ads:
             col1.append(img)
+            fn1.append(Path(img).stem)
             used.add(img)
         elif len(col2) < max_ads:
             col2.append(img)
+            fn2.append(Path(img).stem)
             used.add(img)
         if len(col1) >= max_ads and len(col2) >= max_ads:
             break
@@ -290,7 +325,7 @@ def auto_populate_ads_random(images_dir: Path, slot: str) -> tuple:
     random.shuffle(sep2)
     random.shuffle(sep3)
     
-    return ("\n".join(col1), "\n".join(col2), sep1, sep2, sep3)
+    return ("\n".join(col1), "\n".join(col2), sep1, sep2, sep3), (fn1, fn2)
 
 
 def main():
@@ -334,6 +369,10 @@ def main():
             
             if "---page2---" in md_content:
                 page1_text, page2_text = md_content.split("---page2---", 1)
+                if "---cta---" in page1_text:
+                    page1_main, page1_cta = page1_text.split("---cta---", 1)
+                    page1_text = page1_main.strip()
+                    config["page1_cta"] = page1_cta.strip()
             else:
                 page1_text = md_content
                 page2_text = ""
@@ -387,8 +426,9 @@ def main():
         generate_pdf = args.pdf
 
     separators = []
+    fn1, fn2 = [], []
     if auto_ads:
-        ad_column_1, ad_column_2, sep1, sep2, sep3 = auto_populate_ads_random(images_dir, "ads")
+        (ad_column_1, ad_column_2, sep1, sep2, sep3), (fn1, fn2) = auto_populate_ads_random(images_dir, "ads")
         separators = [sep1, sep2, sep3]
 
     page2_img = resolve_image(page2_image, images_dir, "page2") if page2_image else ""
@@ -409,6 +449,7 @@ def main():
         if page2_files:
             selected = random.choice(page2_files)
             verify_and_convert_image(selected)
+            resize_if_large(selected, max_width=1000)
             page2_img = resolve_image(selected.name, images_dir, "page2")
             title_from_file, author_from_file, imprint_from_file = parse_page2_filename(selected.stem)
             if title_from_file:
@@ -439,6 +480,8 @@ def main():
         ad_folder = images_dir / "ads"
         if ad_folder.exists():
             ad_files = [f for f in ad_folder.glob("*") if f.suffix.lower() in [".jpg", ".jpeg", ".png", ".gif", ".webp"]]
+            for ad_file in ad_files:
+                resize_if_large(ad_file, max_width=800)
             credit_lines = []
             
             has_credits_json = credits_path.exists()
@@ -511,7 +554,7 @@ def main():
 
     html = generate_newsletter(
         ad_column_1, ad_column_2, main_content, separators, title, title_img,
-        title_image_spot, title2, page2_img, page2_border_image, page2_border_file, page2_footer, page1_cta, ad_credits_html, page2_credits, sep_credits_html, images_dir
+        title_image_spot, title2, page2_img, page2_border_image, page2_border_file, page2_footer, page1_cta, ad_credits_html, page2_credits, sep_credits_html, images_dir, fn1, fn2
     )
 
     if args.print:
@@ -537,7 +580,8 @@ def main():
                         display_header_footer=False,
                         margin={"top": "0", "bottom": "0", "left": "0", "right": "0"},
                         height="14in",
-                        width="8.5in"
+                        width="8.5in",
+                        scale=0.85,
                     )
                     browser.close()
                 print(f"PDF generated: {pdf_path}")

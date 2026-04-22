@@ -159,7 +159,7 @@ Drop images into `images/separators/` or `images/separators/central/`. Filename 
 
 | Prefix | Example | Output |
 |--------|---------|--------|
-| `ad_` | `ad_ThoeleSarradet.jpeg` | "By Thoele Sarradet" |
+| `ad_` | `ad_JohnDoe.jpeg` | "By John Doe" |
 | `sep_` | `sep_JohnDoe.jpeg` | "By John Doe" |
 | `OF#_` | `OF1_Author_Publisher.jpeg` | "By Author | Published by Publisher" |
 

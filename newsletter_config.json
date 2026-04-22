@@ -1,9 +1,8 @@
 {
   "title": "# Cafe Stoplight\n\n*A newsletter by Cozy Concierge*",
   "title_image": "",
-  "title_image_spot": false,
+  "title_image_spot": true,
   "main_content": "newsletter_content.md",
-  "page1_cta": "**Support this newsletter!**\n\nUse code COZY for a free subscription to patreon.com/cafestoplight\n*All of the graphics on this newsletter were printed by Cozy Concierge.*\n\nGo to https://cozyconcierge.neocities.org to download a free iPhone sticker pack",
   "title2": "",
   "page2_image": "",
   "page2_border_image": "",
